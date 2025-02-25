@@ -1,264 +1,312 @@
-
-
--- Tabla principal de Fiscalización
+-- Tabla principal de Fiscalización (Revisión de estándares)
 CREATE TABLE Fiscalizacion (
-    id_fiscalizacion INT PRIMARY KEY IDENTITY(1,1),
-    fecha_hora DATETIME DEFAULT GETDATE(),
-    latitud DECIMAL(10,6),
-    longitud DECIMAL(10,6),
-    altitud DECIMAL(10,2),
-    accuracy DECIMAL(10,2),
-    numeroOficina TINYINT NOT NULL DEFAULT 0, -- Cambio realizado
-    observaciones_generales TEXT,
-    mostrar_id VARCHAR(50) NULL -- ID del formulario ODK si es necesario
+    idFiscalizacion INT PRIMARY KEY IDENTITY(1,1),
+    fcFechaHora DATETIME DEFAULT GETDATE() NOT NULL,
+    nrLatitud DECIMAL(10,6) NOT NULL,
+    nrLongitud DECIMAL(10,6) NOT NULL,
+    nrAltitud DECIMAL(10,2) NULL,
+    nrAccuracy DECIMAL(10,2) NULL,
+    nrNumeroOficina TINYINT NOT NULL DEFAULT 0,
+    glObservacionesGenerales VARCHAR(4000) NULL, -- Se evita el uso de TEXT
+    cdMostrarId VARCHAR(50) NULL -- ID del formulario ODK si es necesario
 );
 
--- Unidades Técnicas
+-- Tabla de Unidades Técnicas (Aplicación de estándares)
 CREATE TABLE UnidadTecnica (
-    id_unidad_tecnica INT PRIMARY KEY IDENTITY(1,1),
-    nombre_unidad_tecnica VARCHAR(100) NOT NULL
+    idUnidadTecnica INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreUnidadTecnica VARCHAR(100) NOT NULL
 );
 
+-- Tabla de relación muchos a muchos con nombres estándar
 CREATE TABLE FiscalizacionUnidadTecnica (
-    id_fiscalizacion INT NOT NULL,
-    id_unidad_tecnica INT NOT NULL,
-    PRIMARY KEY (id_fiscalizacion, id_unidad_tecnica),
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion),
-    FOREIGN KEY (id_unidad_tecnica) REFERENCES UnidadTecnica(id_unidad_tecnica)
+    idFiscalizacion INT NOT NULL,
+    idUnidadTecnica INT NOT NULL,
+    CONSTRAINT PK_FiscalizacionUnidadTecnica PRIMARY KEY (idFiscalizacion, idUnidadTecnica),
+    CONSTRAINT FK_FiscalizacionUnidadTecnica_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion),
+    CONSTRAINT FK_FiscalizacionUnidadTecnica_UnidadTecnica FOREIGN KEY (idUnidadTecnica) 
+        REFERENCES UnidadTecnica(idUnidadTecnica)
 );
 
--- Tipos de Actividad
+-- Tabla de Tipos de Actividad
 CREATE TABLE TipoActividad (
-    id_tipo_actividad INT PRIMARY KEY IDENTITY(1,1),
-    nombre_tipo_actividad VARCHAR(100) NOT NULL
+    idTipoActividad INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreTipoActividad VARCHAR(100) NOT NULL
 );
 
+-- Tabla de relación entre Fiscalización y Tipo de Actividad
 CREATE TABLE FiscalizacionTipoActividad (
-    id_fiscalizacion INT NOT NULL,
-    id_tipo_actividad INT NOT NULL,
-    PRIMARY KEY (id_fiscalizacion, id_tipo_actividad),
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion),
-    FOREIGN KEY (id_tipo_actividad) REFERENCES TipoActividad(id_tipo_actividad)
+    idFiscalizacion INT NOT NULL,
+    idTipoActividad INT NOT NULL,
+    CONSTRAINT PK_FiscalizacionTipoActividad PRIMARY KEY (idFiscalizacion, idTipoActividad),
+    CONSTRAINT FK_FiscalizacionTipoActividad_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion),
+    CONSTRAINT FK_FiscalizacionTipoActividad_TipoActividad FOREIGN KEY (idTipoActividad) 
+        REFERENCES TipoActividad(idTipoActividad)
 );
 
--- Orígenes de Actividad
+-- Tabla de Orígenes de Actividad
 CREATE TABLE OrigenActividad (
-    id_origen_actividad INT PRIMARY KEY IDENTITY(1,1),
-    nombre_origen_actividad VARCHAR(100) NOT NULL
+    idOrigenActividad INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreOrigenActividad VARCHAR(100) NOT NULL
 );
 
+-- Tabla de relación entre Fiscalización y Origen de Actividad
 CREATE TABLE FiscalizacionOrigenActividad (
-    id_fiscalizacion INT NOT NULL,
-    id_origen_actividad INT NOT NULL,
-    PRIMARY KEY (id_fiscalizacion, id_origen_actividad),
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion),
-    FOREIGN KEY (id_origen_actividad) REFERENCES OrigenActividad(id_origen_actividad)
+    idFiscalizacion INT NOT NULL,
+    idOrigenActividad INT NOT NULL,
+    CONSTRAINT PK_FiscalizacionOrigenActividad PRIMARY KEY (idFiscalizacion, idOrigenActividad),
+    CONSTRAINT FK_FiscalizacionOrigenActividad_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion),
+    CONSTRAINT FK_FiscalizacionOrigenActividad_OrigenActividad FOREIGN KEY (idOrigenActividad) 
+        REFERENCES OrigenActividad(idOrigenActividad)
 );
 
--- Vías de Fiscalización
+-- Tabla de Vías de Fiscalización
 CREATE TABLE ViaFiscalizacion (
-    id_via_fiscalizacion INT PRIMARY KEY IDENTITY(1,1),
-    nombre_via_fiscalizacion VARCHAR(100) NOT NULL
+    idViaFiscalizacion INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreViaFiscalizacion VARCHAR(100) NOT NULL
 );
 
+-- Tabla de relación entre Fiscalización y Vías de Fiscalización
 CREATE TABLE FiscalizacionViaFiscalizacion (
-    id_fiscalizacion INT NOT NULL,
-    id_via_fiscalizacion INT NOT NULL,
-    PRIMARY KEY (id_fiscalizacion, id_via_fiscalizacion),
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion),
-    FOREIGN KEY (id_via_fiscalizacion) REFERENCES ViaFiscalizacion(id_via_fiscalizacion)
+    idFiscalizacion INT NOT NULL,
+    idViaFiscalizacion INT NOT NULL,
+    CONSTRAINT PK_FiscalizacionViaFiscalizacion PRIMARY KEY (idFiscalizacion, idViaFiscalizacion),
+    CONSTRAINT FK_FiscalizacionViaFiscalizacion_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion),
+    CONSTRAINT FK_FiscalizacionViaFiscalizacion_ViaFiscalizacion FOREIGN KEY (idViaFiscalizacion) 
+        REFERENCES ViaFiscalizacion(idViaFiscalizacion)
 );
 
--- Relación entre Fiscalización e Instituciones Participantes
-CREATE TABLE Instituciones (
-    id_institucion INT PRIMARY KEY IDENTITY(1,1),
-    nombre_institucion VARCHAR(150) NOT NULL UNIQUE
+-- Tabla de Instituciones
+CREATE TABLE Institucion (
+    idInstitucion INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreInstitucion VARCHAR(150) NOT NULL UNIQUE
 );
 
+-- Tabla de relación entre Fiscalización e Instituciones
 CREATE TABLE FiscalizacionInstitucion (
-    id_fiscalizacion INT NOT NULL,
-    id_institucion INT NOT NULL,
-    PRIMARY KEY (id_fiscalizacion, id_institucion),
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion),
-    FOREIGN KEY (id_institucion) REFERENCES Instituciones(id_institucion)
+    idFiscalizacion INT NOT NULL,
+    idInstitucion INT NOT NULL,
+    CONSTRAINT PK_FiscalizacionInstitucion PRIMARY KEY (idFiscalizacion, idInstitucion),
+    CONSTRAINT FK_FiscalizacionInstitucion_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion),
+    CONSTRAINT FK_FiscalizacionInstitucion_Institucion FOREIGN KEY (idInstitucion) 
+        REFERENCES Institucion(idInstitucion)
 );
 
--- Agentes Fiscalizados (SE MUEVE ANTES DE HALLAZGOS)
+-- Tabla de Tipos de Agentes Fiscalizados
 CREATE TABLE TipoAgente (
-    id_tipo_agente INT PRIMARY KEY IDENTITY(1,1),
-    nombre_tipo_agente VARCHAR(100) NOT NULL
+    idTipoAgente INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreTipoAgente VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE AgentesFiscalizados (
-    id_agente INT PRIMARY KEY IDENTITY(1,1),
-    id_fiscalizacion INT NOT NULL,
-    id_tipo_agente INT NOT NULL
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion),
-    FOREIGN KEY (id_tipo_agente) REFERENCES TipoAgente(id_tipo_agente)
+-- Tabla de Agentes Fiscalizados
+CREATE TABLE AgenteFiscalizado (
+    idAgenteFiscalizado INT PRIMARY KEY IDENTITY(1,1),
+    idFiscalizacion INT NOT NULL,
+    idTipoAgente INT NOT NULL,
+    CONSTRAINT FK_AgenteFiscalizado_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion),
+    CONSTRAINT FK_AgenteFiscalizado_TipoAgente FOREIGN KEY (idTipoAgente) 
+        REFERENCES TipoAgente(idTipoAgente)
 );
 
--- Acciones de Fiscalización
+-- Tabla de Acciones de Fiscalización
 CREATE TABLE AccionFiscalizacion (
-    id_accion INT PRIMARY KEY IDENTITY(1,1),
-    id_fiscalizacion INT NOT NULL,
-    comuna VARCHAR(100),
-    latitud DECIMAL(10,6),
-    longitud DECIMAL(10,6),
-    altitud DECIMAL(10,2),
-    accuracy DECIMAL(10,2),
-    lugar VARCHAR(255),
-    ubicacion_manual TEXT,
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion)
+    idAccionFiscalizacion INT PRIMARY KEY IDENTITY(1,1),
+    idFiscalizacion INT NOT NULL,
+    nmComuna VARCHAR(100) NULL,
+    nrLatitud DECIMAL(10,6) NULL,
+    nrLongitud DECIMAL(10,6) NULL,
+    nrAltitud DECIMAL(10,2) NULL,
+    nrAccuracy DECIMAL(10,2) NULL,
+    glLugar VARCHAR(255) NULL,
+    glUbicacionManual VARCHAR(4000) NULL, -- Se evita TEXT
+    CONSTRAINT FK_AccionFiscalizacion_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion)
 );
 
--- Hallazgos (Ahora AgentesFiscalizados EXISTE antes de esta tabla)
-CREATE TABLE Hallazgos (
-    id_hallazgo INT PRIMARY KEY IDENTITY(1,1),
-    id_accion INT NOT NULL,
-    id_agente INT NOT NULL, 
-    FOREIGN KEY (id_accion) REFERENCES AccionFiscalizacion(id_accion),
-    FOREIGN KEY (id_agente) REFERENCES AgentesFiscalizados(id_agente)
+-- Tabla de Hallazgos
+CREATE TABLE Hallazgo (
+    idHallazgo INT PRIMARY KEY IDENTITY(1,1),
+    idAccionFiscalizacion INT NOT NULL,
+    idAgenteFiscalizado INT NOT NULL,
+    CONSTRAINT FK_Hallazgo_AccionFiscalizacion FOREIGN KEY (idAccionFiscalizacion) 
+        REFERENCES AccionFiscalizacion(idAccionFiscalizacion),
+    CONSTRAINT FK_Hallazgo_AgenteFiscalizado FOREIGN KEY (idAgenteFiscalizado) 
+        REFERENCES AgenteFiscalizado(idAgenteFiscalizado)
 );
 
-
-CREATE TABLE EspeciesLegales (
-    id_especie_encontrada INT PRIMARY KEY IDENTITY(1,1),
-    id_accion INT NOT NULL,
-    id_especie INT NOT NULL,
-    categoria VARCHAR(50) CHECK (categoria IN ('recurso', 'producto')),
-    tipo_producto VARCHAR(50),
-    cantidad DECIMAL(10,2),
-    unidad_medida VARCHAR(50),
-    FOREIGN KEY (id_accion) REFERENCES AccionFiscalizacion(id_accion)
+-- Tabla de Especies Legales
+CREATE TABLE EspecieLegal (
+    idEspecieEncontrada INT PRIMARY KEY IDENTITY(1,1),
+    idAccionFiscalizacion INT NOT NULL,
+    idEspecie INT NOT NULL,
+    cdCategoria VARCHAR(50) CHECK (cdCategoria IN ('recurso', 'producto')),
+    nmTipoProducto VARCHAR(50) NULL,
+    nrCantidad DECIMAL(10,2) NULL,
+    nmUnidadMedida VARCHAR(50) NULL,
+    CONSTRAINT FK_EspecieLegal_AccionFiscalizacion FOREIGN KEY (idAccionFiscalizacion) 
+        REFERENCES AccionFiscalizacion(idAccionFiscalizacion)
 );
 
--- Evidencias
+-- Tabla de Evidencias
 CREATE TABLE Evidencia (
-    id_evidencia INT PRIMARY KEY IDENTITY(1,1),
-    id_accion INT NOT NULL,
-    tipo_evidencia VARCHAR(50) CHECK (tipo_evidencia IN ('image', 'audio', 'video', 'documento')),
-    link_evidencia TEXT,
-    FOREIGN KEY (id_accion) REFERENCES AccionFiscalizacion(id_accion)
+    idEvidencia INT PRIMARY KEY IDENTITY(1,1),
+    idAccionFiscalizacion INT NOT NULL,
+    cdTipoEvidencia VARCHAR(50) CHECK (cdTipoEvidencia IN ('image', 'audio', 'video', 'documento')),
+    glLinkEvidencia VARCHAR(4000) NULL, -- Se evita TEXT
+    CONSTRAINT FK_Evidencia_AccionFiscalizacion FOREIGN KEY (idAccionFiscalizacion) 
+        REFERENCES AccionFiscalizacion(idAccionFiscalizacion)
 );
 
--- Cometidos y Funcionarios
-CREATE TABLE Cometidos (
-    id_cometido INT PRIMARY KEY IDENTITY(1,1),
-    id_fiscalizacion INT NOT NULL,
-    hora_termino TIME,
-    observaciones TEXT,
-    foto_evidencia TEXT,
-    archivo_evidencia TEXT,
-    kilometraje_final INT,
-    firma_imagen TEXT,
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion)
+-- Tabla de Cometidos
+CREATE TABLE Cometido (
+    idCometido INT PRIMARY KEY IDENTITY(1,1),
+    idFiscalizacion INT NOT NULL,
+    fcHoraTermino TIME NULL,
+    glObservaciones VARCHAR(4000) NULL, -- Se evita TEXT
+    glFotoEvidencia VARCHAR(4000) NULL, -- Se evita TEXT
+    glArchivoEvidencia VARCHAR(4000) NULL, -- Se evita TEXT
+    nrKilometrajeFinal INT NULL,
+    glFirmaImagen VARCHAR(4000) NULL, -- Se evita TEXT
+    CONSTRAINT FK_Cometido_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion)
 );
 
-CREATE TABLE Funcionarios (
-    id_funcionario INT PRIMARY KEY IDENTITY(1,1),
-    rut VARCHAR(12) UNIQUE,
-    nombre VARCHAR(100) NOT NULL,
-    cargo VARCHAR(100) NOT NULL,
-    id_institucion INT NOT NULL,
-    FOREIGN KEY (id_institucion) REFERENCES Instituciones(id_institucion)
+-- Tabla de Funcionarios
+CREATE TABLE Funcionario (
+    idFuncionario INT PRIMARY KEY IDENTITY(1,1),
+    cdRut VARCHAR(12) UNIQUE NOT NULL,
+    nmNombre VARCHAR(100) NOT NULL,
+    nmCargo VARCHAR(100) NOT NULL,
+    idInstitucion INT NOT NULL,
+    CONSTRAINT FK_Funcionario_Institucion FOREIGN KEY (idInstitucion) 
+        REFERENCES Institucion(idInstitucion)
 );
 
-CREATE TABLE CometidosFuncionarios (
-    id_cometido INT NOT NULL,
-    id_funcionario INT NOT NULL,
-    PRIMARY KEY (id_cometido, id_funcionario),
-    FOREIGN KEY (id_cometido) REFERENCES Cometidos(id_cometido),
-    FOREIGN KEY (id_funcionario) REFERENCES Funcionarios(id_funcionario)
+-- Tabla de relación entre Cometidos y Funcionarios
+CREATE TABLE CometidoFuncionario (
+    idCometido INT NOT NULL,
+    idFuncionario INT NOT NULL,
+    CONSTRAINT PK_CometidoFuncionario PRIMARY KEY (idCometido, idFuncionario),
+    CONSTRAINT FK_CometidoFuncionario_Cometido FOREIGN KEY (idCometido) 
+        REFERENCES Cometido(idCometido),
+    CONSTRAINT FK_CometidoFuncionario_Funcionario FOREIGN KEY (idFuncionario) 
+        REFERENCES Funcionario(idFuncionario)
 );
 
--- Medidas y su Relación con los Agentes
+-- Tabla de Medidas
 CREATE TABLE Medida (
-    id_medida INT PRIMARY KEY IDENTITY(1,1),
-    descripcion VARCHAR(255) NOT NULL, 
-    tipo VARCHAR(50) CHECK (tipo IN ('cumplimiento', 'incumplimiento'))
+    idMedida INT PRIMARY KEY IDENTITY(1,1),
+    glDescripcion VARCHAR(255) NOT NULL,
+    cdTipo VARCHAR(50) CHECK (cdTipo IN ('cumplimiento', 'incumplimiento'))
 );
 
+-- Tabla de relación entre Agentes Fiscalizados y Medidas
 CREATE TABLE AgenteMedida (
-    id_agente INT NOT NULL,
-    id_medida INT NOT NULL,
-    PRIMARY KEY (id_agente, id_medida),
-    FOREIGN KEY (id_agente) REFERENCES AgentesFiscalizados(id_agente),
-    FOREIGN KEY (id_medida) REFERENCES Medida(id_medida)
+    idAgenteFiscalizado INT NOT NULL,
+    idMedida INT NOT NULL,
+    CONSTRAINT PK_AgenteMedida PRIMARY KEY (idAgenteFiscalizado, idMedida),
+    CONSTRAINT FK_AgenteMedida_AgenteFiscalizado FOREIGN KEY (idAgenteFiscalizado) 
+        REFERENCES AgenteFiscalizado(idAgenteFiscalizado),
+    CONSTRAINT FK_AgenteMedida_Medida FOREIGN KEY (idMedida) 
+        REFERENCES Medida(idMedida)
 );
 
-CREATE TABLE VehiculosFiscalizacion (
-    id_vehiculo INT PRIMARY KEY IDENTITY(1,1),
-    id_fiscalizacion INT NOT NULL,
-    patente VARCHAR(20) NOT NULL,
-    tipo_vehiculo VARCHAR(50) NOT NULL, -- Nuevo campo para almacenar el tipo de vehículo
-    kilometraje_inicial INT,
-    kilometraje_final INT,
-    FOREIGN KEY (id_fiscalizacion) REFERENCES Fiscalizacion(id_fiscalizacion)
+-- Tabla de Vehículos utilizados en Fiscalización
+CREATE TABLE VehiculoFiscalizacion (
+    idVehiculo INT PRIMARY KEY IDENTITY(1,1),
+    idFiscalizacion INT NOT NULL,
+    cdPatente VARCHAR(20) NOT NULL,
+    nmTipoVehiculo VARCHAR(50) NOT NULL,
+    nrKilometrajeInicial INT NULL,
+    nrKilometrajeFinal INT NULL,
+    CONSTRAINT FK_VehiculoFiscalizacion_Fiscalizacion FOREIGN KEY (idFiscalizacion) 
+        REFERENCES Fiscalizacion(idFiscalizacion)
 );
 
+-- Tabla de Condiciones de Riesgo
 CREATE TABLE CondicionRiesgo (
-    id_riesgo INT PRIMARY KEY IDENTITY(1,1),
-    nombre_riesgo VARCHAR(255) NOT NULL
+    idCondicionRiesgo INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreRiesgo VARCHAR(255) NOT NULL
 );
 
+-- Tabla de relación entre Acciones de Fiscalización y Condiciones de Riesgo
 CREATE TABLE AccionFiscalizacionRiesgo (
-    id_accion INT NOT NULL,
-    id_riesgo INT NOT NULL,
-    PRIMARY KEY (id_accion, id_riesgo),
-    FOREIGN KEY (id_accion) REFERENCES AccionFiscalizacion(id_accion),
-    FOREIGN KEY (id_riesgo) REFERENCES CondicionRiesgo(id_riesgo)
+    idAccionFiscalizacion INT NOT NULL,
+    idCondicionRiesgo INT NOT NULL,
+    CONSTRAINT PK_AccionFiscalizacionRiesgo PRIMARY KEY (idAccionFiscalizacion, idCondicionRiesgo),
+    CONSTRAINT FK_AccionFiscalizacionRiesgo_AccionFiscalizacion FOREIGN KEY (idAccionFiscalizacion) 
+        REFERENCES AccionFiscalizacion(idAccionFiscalizacion),
+    CONSTRAINT FK_AccionFiscalizacionRiesgo_CondicionRiesgo FOREIGN KEY (idCondicionRiesgo) 
+        REFERENCES CondicionRiesgo(idCondicionRiesgo)
 );
 
+-- Tabla de relación entre Acciones de Fiscalización y Especies
 CREATE TABLE AccionFiscalizacionEspecie (
-    id_accion INT NOT NULL,
-    id_especie INT NOT NULL,
-    PRIMARY KEY (id_accion, id_especie),
-    FOREIGN KEY (id_accion) REFERENCES AccionFiscalizacion(id_accion)
+    idAccionFiscalizacion INT NOT NULL,
+    idEspecie INT NOT NULL,
+    CONSTRAINT PK_AccionFiscalizacionEspecie PRIMARY KEY (idAccionFiscalizacion, idEspecie),
+    CONSTRAINT FK_AccionFiscalizacionEspecie_AccionFiscalizacion FOREIGN KEY (idAccionFiscalizacion) 
+        REFERENCES AccionFiscalizacion(idAccionFiscalizacion)
 );
 
-CREATE TABLE EspeciesIlegales (
-    id_especie_ilegal INT PRIMARY KEY IDENTITY(1,1),
-    id_hallazgo INT NOT NULL,
-    id_especie INT NOT NULL,
-    categoria VARCHAR(50) CHECK (categoria IN ('recurso', 'producto')),
-    tipo_producto VARCHAR(50), -- Tipo de producto si aplica
-    cantidad DECIMAL(10,2),
-    unidad_medida VARCHAR(50),
-    FOREIGN KEY (id_hallazgo) REFERENCES Hallazgos(id_hallazgo)
+-- Tabla de Especies Ilegales encontradas
+CREATE TABLE EspecieIlegal (
+    idEspecieIlegal INT PRIMARY KEY IDENTITY(1,1),
+    idHallazgo INT NOT NULL,
+    idEspecie INT NOT NULL,
+    cdCategoria VARCHAR(50) CHECK (cdCategoria IN ('recurso', 'producto')),
+    nmTipoProducto VARCHAR(50) NULL,
+    nrCantidad DECIMAL(10,2) NULL,
+    nmUnidadMedida VARCHAR(50) NULL,
+    CONSTRAINT FK_EspecieIlegal_Hallazgo FOREIGN KEY (idHallazgo) 
+        REFERENCES Hallazgo(idHallazgo)
 );
 
+-- Tabla de Resultados de Hallazgos
 CREATE TABLE ResultadoHallazgo (
-    id_resultado INT PRIMARY KEY IDENTITY(1,1),
-    nombre_resultado VARCHAR(255) NOT NULL
+    idResultadoHallazgo INT PRIMARY KEY IDENTITY(1,1),
+    nmNombreResultado VARCHAR(255) NOT NULL
 );
+
+
+-- Tabla de relación entre Hallazgo y Resultado de Hallazgo
 CREATE TABLE HallazgoResultado (
-    id_hallazgo INT NOT NULL,
-    id_resultado INT NOT NULL,
-    PRIMARY KEY (id_hallazgo, id_resultado),
-    FOREIGN KEY (id_hallazgo) REFERENCES Hallazgos(id_hallazgo),
-    FOREIGN KEY (id_resultado) REFERENCES ResultadoHallazgo(id_resultado)
+    idHallazgo INT NOT NULL,
+    idResultadoHallazgo INT NOT NULL,
+    CONSTRAINT PK_HallazgoResultado PRIMARY KEY (idHallazgo, idResultadoHallazgo),
+    CONSTRAINT FK_HallazgoResultado_Hallazgo FOREIGN KEY (idHallazgo) 
+        REFERENCES Hallazgo(idHallazgo),
+    CONSTRAINT FK_HallazgoResultado_ResultadoHallazgo FOREIGN KEY (idResultadoHallazgo) 
+        REFERENCES ResultadoHallazgo(idResultadoHallazgo)
 );
+
+-- Tabla de Evidencias asociadas a Hallazgos
 CREATE TABLE EvidenciaHallazgo (
-    id_evidencia_hallazgo INT PRIMARY KEY IDENTITY(1,1),
-    id_hallazgo INT NOT NULL,
-    tipo_evidencia VARCHAR(50) CHECK (tipo_evidencia IN ('image', 'documento')),
-    link_evidencia TEXT NOT NULL,
-    medio_verificacion_tipo VARCHAR(500) NOT NULL,
-    medio_verificacion_folio INT NOT NULL,
-    actividad TEXT,
-    antecedentes_referencia TEXT,
-    observaciones TEXT,
-    FOREIGN KEY (id_hallazgo) REFERENCES Hallazgos(id_hallazgo)
+    idEvidenciaHallazgo INT PRIMARY KEY IDENTITY(1,1),
+    idHallazgo INT NOT NULL,
+    cdTipoEvidencia VARCHAR(50) CHECK (cdTipoEvidencia IN ('image', 'documento')),
+    glLinkEvidencia VARCHAR(4000) NOT NULL, -- Se evita TEXT
+    glMedioVerificacionTipo VARCHAR(500) NOT NULL,
+    nrMedioVerificacionFolio INT NOT NULL,
+    glActividad VARCHAR(4000) NULL, -- Se evita TEXT
+    glAntecedentesReferencia VARCHAR(4000) NULL, -- Se evita TEXT
+    glObservaciones VARCHAR(4000) NULL, -- Se evita TEXT
+    CONSTRAINT FK_EvidenciaHallazgo_Hallazgo FOREIGN KEY (idHallazgo) 
+        REFERENCES Hallazgo(idHallazgo)
 );
+
+-- Tabla de relación entre EvidenciaHallazgo y Medidas
 CREATE TABLE EvidenciaHallazgoMedida (
-    id_evidencia_hallazgo INT NOT NULL,
-    id_medida INT NOT NULL,
-    PRIMARY KEY (id_evidencia_hallazgo, id_medida),
-    FOREIGN KEY (id_evidencia_hallazgo) REFERENCES EvidenciaHallazgo(id_evidencia_hallazgo),
-    FOREIGN KEY (id_medida) REFERENCES Medida(id_medida)
+    idEvidenciaHallazgo INT NOT NULL,
+    idMedida INT NOT NULL,
+    CONSTRAINT PK_EvidenciaHallazgoMedida PRIMARY KEY (idEvidenciaHallazgo, idMedida),
+    CONSTRAINT FK_EvidenciaHallazgoMedida_EvidenciaHallazgo FOREIGN KEY (idEvidenciaHallazgo) 
+        REFERENCES EvidenciaHallazgo(idEvidenciaHallazgo),
+    CONSTRAINT FK_EvidenciaHallazgoMedida_Medida FOREIGN KEY (idMedida) 
+        REFERENCES Medida(idMedida)
 );
-
-
-
-
-
