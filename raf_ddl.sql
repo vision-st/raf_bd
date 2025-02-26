@@ -238,6 +238,7 @@ CREATE TABLE CondicionRiesgo (
 CREATE TABLE AccionFiscalizacionRiesgo (
     idAccionFiscalizacion INT NOT NULL,
     idCondicionRiesgo INT NOT NULL,
+    idMatrizBase TINYINT NOT NULL DEFAULT 0,
     CONSTRAINT PK_AccionFiscalizacionRiesgo PRIMARY KEY (idAccionFiscalizacion, idCondicionRiesgo),
     CONSTRAINT FK_AccionFiscalizacionRiesgo_AccionFiscalizacion FOREIGN KEY (idAccionFiscalizacion) 
         REFERENCES AccionFiscalizacion(idAccionFiscalizacion),
